@@ -14,6 +14,7 @@
 package com.facebook.presto.cassandra;
 
 import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.LocalDate;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.utils.Bytes;
 import com.facebook.presto.cassandra.util.CassandraCqlUtils;
@@ -339,7 +340,8 @@ public enum CassandraType
                 case TIMESTAMP:
                     return Long.toString(row.getTimestamp(i).getTime());
                 case DATE:
-                    return CassandraCqlUtils.quoteStringLiteral(row.getDate(i).toString());
+                    return CassandraCqlUtils.quoteStringLiteral(
+                            LocalDate.fromDaysSinceEpoch(row.getDate(i).getDaysSinceEpoch()).toString());
                 case INET:
                     return CassandraCqlUtils.quoteStringLiteral(toAddrString(row.getInet(i)));
                 case VARINT:
@@ -440,7 +442,7 @@ public enum CassandraType
             case TIMESTAMP:
                 return new Date((Long) nativeValue);
             case DATE:
-                return ((Long) nativeValue).intValue();
+                return LocalDate.fromDaysSinceEpoch(((Long) nativeValue).intValue());
             case UUID:
             case TIMEUUID:
                 return java.util.UUID.fromString(((Slice) nativeValue).toStringUtf8());
