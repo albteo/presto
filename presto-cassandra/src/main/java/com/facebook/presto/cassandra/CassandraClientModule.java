@@ -14,6 +14,7 @@
 package com.facebook.presto.cassandra;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
@@ -79,7 +80,11 @@ public class CassandraClientModule
         requireNonNull(config, "config is null");
         requireNonNull(extraColumnMetadataCodec, "extraColumnMetadataCodec is null");
 
+        CodecRegistry codecRegistry = new CodecRegistry();
+        codecRegistry.register(new LocalDateCustomCodec());
+
         Cluster.Builder clusterBuilder = Cluster.builder()
+                .withCodecRegistry(codecRegistry)
                 .withProtocolVersion(ProtocolVersion.V3);
 
         List<String> contactPoints = requireNonNull(config.getContactPoints(), "contactPoints is null");
